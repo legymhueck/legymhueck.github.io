@@ -4,23 +4,21 @@ title: Arch Linux on WLS2
 author: MicLeh
 date: 2023-09-02 09:42:00 +0200
 pin: true
-categories: [Linux, ArchLinux]
-tags: [linux]
+categories: [Linux, ArchLinux, WSL, WSL2]
+tags: [linux, wsl]
 ---
 
-# Installing Arch Linux from bootstrap
+# Installing Arch Linux bootstap image
 
-## Getting the bootstrap image from official archlinux.org mirrors
-
-Open up a powershell terminal to download the archlinux bootstrap tarball
+## Downloading bootstrap tar-file from official archlinux.org mirrors
 
 ```powershell
-Invoke-WebRequest -Uri "http://ftp.halifax.rwth-aachen.de/archlinux/iso/latest/archlinux-bootstrap-2022.06.01-x86_64.tar.gz" -OutFile "$HOME\Downloads\archlinux-bootstrap.tar.gz"
+Invoke-WebRequest -Uri "https://ftp.halifax.rwth-aachen.de/archlinux/iso/2023.09.01/archlinux-bootstrap-x86_64.tar.gz.sig" -OutFile "$HOME\Downloads\archlinux-bootstrap-x86_64.tar.gz"
 ```
 
-## Repackaging the .tar.gz
+## Extracting and repackaging the bootstap image
 
-Extract and repackage the downloaded bootstrap file in another Linux distro, e.g. WSL Ubuntu
+Extract and repackage the downloaded bootstrap image in another Linux distro, e.g. WSL Ubuntu
 
 ```bash
 # Go to the user's Downloads folder
@@ -57,7 +55,7 @@ md "$HOME\wsl\arch"
 
 Import the tarball requires an installation location with no other distro, or otherwise it will fail.
 
-```console
+```powershell
 wsl --import Arch "$HOME\wsl\arch" "$HOME\Downloads\archlinux-bootstrap_repackage-x86_64.tar.gz"
 ```
 
@@ -93,19 +91,22 @@ pacman -Syy --noconfirm base-devel git vim nano wget reflector sudo which go ope
 reflector --country "Germany" --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 ```
 
-### Setting root password and enabling sudo for users
+### Setting up sudo for users
 
 ```bash
 export EDITOR=vim ; visudo
 ```
 
-![wheel unedited](/assets/img/posts/installing-arch-on-wsl-the-right-way/uncomment-suders-file.png)
-
 Uncomment the line containing `%wheel ALL=(ALL) ALL`; do the same to the next line with `%wheel` if you want to run sudo tasks without having to provide your password.
 
-Now set the root user password with `passwd`. Do this before setting up the login user account. Once the root user has a password, create a user and prompt to set a password.
+### Setting root password
 
-### Creating a user and giving a password
+```bash
+passwd
+```
+Set the root user password with `passwd` before setting up the login user account. Once the root user has a password, create a user and prompt to set a password.
+
+### Creating a user and setting a password
 
 ```bash
 useradd -m -G wheel -s /bin/bash -d /home/michael michael ; passwd michael
