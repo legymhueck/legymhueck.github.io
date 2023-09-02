@@ -191,39 +191,6 @@ LC_ALL=
 " > /etc/locale.conf
 ```
 
-## Bonus Level: Boot Arch when You Log into Windows
-
-Getting `wsl` to start when you log in to **Windows** is pretty simple even though you have to use _Task Schedule_. If you liked the idea of **Arch** booting before open _Windows Terminal_ or start _VSCode_ and enable this through distro that task will have to be removed. Besides, the script that is used doesn't all _wsl_ to persist after you close an application.
-
-While logged into **Arch** create a visual basic script.
-
-```bash
-echo 'set object = createobject("wscript.shell")
-object.run "wsl.exe --distribution Arch", 0' > /mnt/to/same/location/of/arch/install/dir/boot-arch-at-logon.vbs
-```
-
-Now goto the search box in the taskbar and enter in _Task Schedule_ and click on "Run as administrator." If allowed distrod to set the task your going to have to remove it first. Highlight "Task Schedule Library," goto the available task to the right and locate one that has "StartWSL_Arch_for_."
-
-![Locate task](/assets/img/posts/installing-arch-on-wsl-the-right-way/locate-task.png)
-
-Now delete the task.
-
-The next step is the setup a new task, start by highlighting "Task Schedule Library" again and click on "New Folder..." and naming it **WSL**. Now when you expend the library you should see the new folder.
-
-![Locate task](/assets/img/posts/installing-arch-on-wsl-the-right-way/task-scheduler.png)
-
-Hightlight the folder and select "Create Basic Task" and follow the points below for task settings.
-
-- **Task Name**: Start Arch at Login
-- **Triggers**: At log on
-- **Start program**: (Drive letter):\path\to\boot-arch-at-logon.vbs
-- **Conditions**: Unchanged
-- **Settings**: Uncheck, "Stop task if it runs longer then."
-
-Save the task if you want the test it out the reboot the machine, once you log back in open up the _PowerShell_ profile of _Windows Terminal_ and run the `Get-Process` command. You should see 2 or 3 processes, one for wsl and the others wslhost; the later is **Arch**.
-
-With all that done, you are ready to enjoy **Archlinux**.
-
 ### Optional: Enabling `multilib`
 
 ```bash
