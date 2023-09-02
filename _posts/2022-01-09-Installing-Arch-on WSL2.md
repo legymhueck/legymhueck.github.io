@@ -65,9 +65,9 @@ When importing the tarball is complete, run
 wsl -d Arch
 ```
 
-You will be greeted with a root user prompt. Before anything is done, switch to the home directory with `cd`
+You will be greeted with a root user prompt `#`. Switch to the home directory with `cd`
 
-### Making `pacman` work
+## Making `pacman` work
 
 ```bash
 sed -i 's:#Server:Server:g' /etc/pacman.d/mirrorlist
@@ -79,19 +79,21 @@ sed -i 's:#Server:Server:g' /etc/pacman.d/mirrorlist
 pacman-key --init && pacman-key --populate archlinux
 ```
 
+## Using reflector to find the fastest mirrors (here for Germany)
+
+```bash
+reflector --country "Germany" --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+```
+
 ### Installing some required packages
 
 ```bash
 pacman -Syy --noconfirm base-devel git vim nano wget reflector sudo which go openssh man-db bash-completion fontconfig ntp
 ```
 
-### Using reflector to find the fastest mirrors (here for Germany)
+## Setting up passwords and users
 
-```bash
-reflector --country "Germany" --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
-```
-
-### Setting up sudo for users
+### sudo for users
 
 ```bash
 export EDITOR=vim ; visudo
@@ -99,18 +101,23 @@ export EDITOR=vim ; visudo
 
 Uncomment the line containing `%wheel ALL=(ALL) ALL`; do the same to the next line with `%wheel` if you want to run sudo tasks without having to provide your password.
 
-### Setting root password
+### root password
+
+Set the root user password with `passwd` before setting up the login user account.
 
 ```bash
 passwd
 ```
-Set the root user password with `passwd` before setting up the login user account. Once the root user has a password, create a user and prompt to set a password.
 
 ### Creating a user and setting a password
+
+Now create a user and set a password.
 
 ```bash
 useradd -m -G wheel -s /bin/bash -d /home/michael michael ; passwd michael
 ```
+
+## Setting up wsl.conf
 
 Because **Archlinux** was imported, by default the login user is the root user even with a user account. To prevent this, a config file needs to be created to tell `wsl` which user to log in. Create the file `/etc/wsl.conf` and copy the following, replacing 'michael' with your own username.
 
@@ -141,7 +148,9 @@ systemd=true
 
 ## Finishing the setup process
 
-If you use `Windows Terminal`, the best way is close it, then reopen it; a new profile for **Arch** has been added. To change the starting directory for **Arch**, goto settings and locate the profile for **Arch**. Find "Starting Directory" and replace it with `\\wsl$\Arch\home\michael`, replacing 'michael' with your own username. Then click save.
+If you use `Windows Terminal`, the best way is to close it, and then reopen it. A new profile for **Arch** has been added.
+
+### Check if `systemd` is working
 
 ```bash
 sudo systemctl status
@@ -173,7 +182,9 @@ Then run
 
 ```bash
 sudo locale-gen
+
 sudo su
+
 echo "LANG=en_US.UTF-8
 LANGUAGE=en_US
 LC_CTYPE=de_DE.UTF-8
@@ -192,7 +203,7 @@ LC_ALL=
 " > /etc/locale.conf
 ```
 
-### Optional: Enabling `multilib`
+## Optional: Enabling `multilib`
 
 ```bash
 linenumber=$(grep -nr "\\#\\[multilib\\]" /etc/pacman.conf | gawk '{print $1}' FS=":")
