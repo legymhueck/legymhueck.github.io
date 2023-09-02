@@ -1,3 +1,13 @@
+---
+layout: post
+title: Manual Arch Linux install with encryption
+author: MicLeh
+date: 2022-09-02 18:42:00 +0200
+pin: true
+categories: [Linux, ArchLinux, WSL, WSL2, Installation]
+tags: [linux, wsl]
+---
+
 # Arch Linux Installation auf der Kommandozeile
 
 __Ziel dieses Tutorials ist es, Linux über die Kommandozeile zu installieren.__
