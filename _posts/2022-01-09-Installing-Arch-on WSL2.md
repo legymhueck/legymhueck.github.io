@@ -23,26 +23,26 @@ Invoke-WebRequest -Uri "http://ftp.halifax.rwth-aachen.de/archlinux/iso/latest/a
 Extract and repackage the downloaded bootstrap file in another Linux distro, e.g. WSL Ubuntu
 
 ```bash
-# Assuming your Windows username is michael, change to your user's Downloads folder
-cd /mnt/c/Users/michael/Downloads/
+# Go to the user's Downloads folder
+cd /mnt/c/Users/$USER/Downloads/
 
 # Move the downloaded file to the Linux home folder
-mv archlinux-bootstrap.tar.gz ~
+mv archlinux-bootstrap-x86_64.tar.gz ~
 
 # Go to your home folder
 cd
 
 # Extract the tar.gz bootstap file
-tar -zxvf archlinux-bootstrap.tar.gz
+tar -zxvf archlinux-bootstrap-x86_64.tar.gz
 
 # Go to the following subdirectory
 cd root.x86_64
 
-# Repackage the extracted tar.gt
-tar -zcvf arch_bootstrap_repackage.tar.gz .
+# Repackage the extracted tar.gz (there is a dot at the end)
+tar -zcvf archlinux-bootstrap_repackage-x86_64.tar.gz .
 
 # Put the file back to your Windows Downloads folder
-mv arch_bootstrap.tar.gz /mnt/c/Users/michael/Downloads/
+mv archlinux-bootstrap_repackage-x86_64.tar.gz /mnt/c/Users/$USER/Downloads/
 ```
 
 ## Pick an installation location
@@ -50,7 +50,7 @@ mv arch_bootstrap.tar.gz /mnt/c/Users/michael/Downloads/
 Create a directory in you home folder labeled "wsl". Make sure that each distro has their own location.
 
 ```powershell
-md "$HOME\wsl"
+md "$HOME\wsl\arch"
 ```
 
 ## Importing and System Update
@@ -58,7 +58,7 @@ md "$HOME\wsl"
 Import the tarball requires an installation location with no other distro, or otherwise it will fail.
 
 ```console
-wsl --import Arch "$HOME\wsl\arch" "$HOME\Downloads\arch_bootstrap_repackage.tar.gz"
+wsl --import Arch "$HOME\wsl\arch" "$HOME\Downloads\archlinux-bootstrap_repackage-x86_64.tar.gz"
 ```
 
 When importing the tarball is complete, run
@@ -67,21 +67,12 @@ When importing the tarball is complete, run
 wsl -d Arch
 ```
 
-You will be greeted with a root user prompt. Before anything is done, switch to the home directory with `cd ~` 
+You will be greeted with a root user prompt. Before anything is done, switch to the home directory with `cd`
 
-### Making `pacman` work.
+### Making `pacman` work
 
 ```bash
 sed -i 's:#Server:Server:g' /etc/pacman.d/mirrorlist
-```
-
-### Enabling `multilib`
-
-```bash
-linenumber=$(grep -nr "\\#\\[multilib\\]" /etc/pacman.conf | gawk '{print $1}' FS=":")
-sed -i "${linenumber}s:.*:[multilib]:" /etc/pacman.conf
-linenumber=$((linenumber+1))
-sed -i "${linenumber}s:.*:Include = /etc/pacman.d/mirrorlist:" /etc/pacman.conf
 ```
 
 ### Initializing the keyring and populating it
@@ -90,10 +81,10 @@ sed -i "${linenumber}s:.*:Include = /etc/pacman.d/mirrorlist:" /etc/pacman.conf
 pacman-key --init && pacman-key --populate archlinux
 ```
 
-### Installing some required packages.
+### Installing some required packages
 
 ```bash
-pacman -S --noconfirm base-devel git vim nano wget reflector sudo which go openssh man-db bash-completion fontconfig ntp
+pacman -Syy --noconfirm base-devel git vim nano wget reflector sudo which go openssh man-db bash-completion fontconfig ntp
 ```
 
 ### Using reflector to find the fastest mirrors (here for Germany)
@@ -122,6 +113,8 @@ useradd -m -G wheel -s /bin/bash -d /home/michael michael ; passwd michael
 
 Because **Archlinux** was imported, by default the login user is the root user even with a user account. To prevent this, a config file needs to be created to tell `wsl` which user to log in. Create the file `/etc/wsl.conf` and copy the following, replacing 'michael' with your own username.
 
+[Settings for wsl.conf](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)
+
 ```ini
 [automount]
 enabled = true
@@ -140,13 +133,16 @@ appendWindowsPath = true
 
 [user]
 default = michael
+
+[boot]
+systemd=true
 ```
 
 ## Finishing the setup process
 
 If you use `Windows Terminal`, the best way is close it, then reopen it; a new profile for **Arch** has been added. To change the starting directory for **Arch**, goto settings and locate the profile for **Arch**. Find "Starting Directory" and replace it with `\\wsl$\Arch\home\michael`, replacing 'michael' with your own username. Then click save.
 
-```console
+```bash
 sudo systemctl status
 ```
 
@@ -154,13 +150,6 @@ If `systemd` is functional, you should see a green indication, and you can creat
 
 ```bash
 sudo systemctl enable --now dbus.service ntpd.service sshd.service
-```
-
-Enable port forwarding so that you can access **Arch** from outside _wsl_.
-
-```console
-echo 22 80 443 | sudo tee /opt/distrod/conf/tcp4_ports
-sudo systemctl enable --now portproxy.service
 ```
 
 ## Installing and aur helper such as yay
@@ -234,3 +223,12 @@ Hightlight the folder and select "Create Basic Task" and follow the points below
 Save the task if you want the test it out the reboot the machine, once you log back in open up the _PowerShell_ profile of _Windows Terminal_ and run the `Get-Process` command. You should see 2 or 3 processes, one for wsl and the others wslhost; the later is **Arch**.
 
 With all that done, you are ready to enjoy **Archlinux**.
+
+### Optional: Enabling `multilib`
+
+```bash
+linenumber=$(grep -nr "\\#\\[multilib\\]" /etc/pacman.conf | gawk '{print $1}' FS=":")
+sed -i "${linenumber}s:.*:[multilib]:" /etc/pacman.conf
+linenumber=$((linenumber+1))
+sed -i "${linenumber}s:.*:Include = /etc/pacman.d/mirrorlist:" /etc/pacman.conf
+```
